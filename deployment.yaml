@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp
+  namespace: default
+  annotations:
+    kubernetes.io/change-cause: "version 1"
+spec:
+  replicas: 12
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nodeapp
+  template:
+    metadata:
+      labels:
+        app: nodeapp
+        environment: dev
+    spec:
+      tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      containers:
+        - name: nodeapp
+          image: mmd21/nodeapp:1
+          envFrom:
+            - configMapRef:
+                name: my-config
+          ports:
+            - containerPort: 8080
